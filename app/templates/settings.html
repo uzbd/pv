@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Settings & tools · {{ app_title }}{% endblock %}
+{% block content %}
+<section class="page-heading"><span class="eyebrow">CONTROL CENTER</span><h1>Settings & tools</h1><p class="muted">সব Import/Export, Backup, Storage এবং Security কাজ আধুনিক ওয়েব ইন্টারফেস থেকেই পরিচালনা করা যায়—কোনো ম্যানুয়াল কমান্ড টাইপ করতে হয় না।</p></section>
+<div class="settings-layout">
+  <nav class="settings-nav panel" aria-label="Settings sections"><a href="#storage">Storage</a><a href="#import">Import</a><a href="#export">Export</a><a href="#backup">Backup</a><a href="#security">Security</a></nav>
+  <div class="settings-content">
+    <section class="panel settings-section" id="storage">
+      <div class="panel-heading"><div><span class="eyebrow">PERSISTENT DATA</span><h2>Storage configuration</h2></div><span class="badge badge-success">{{ config.storage_mode }}</span></div>
+      <p class="muted">তোমার Vault-এর ডেটা হোস্টিং সার্ভারের লোকাল ডিস্কে নির্ভর করে না। আগের Bot প্রজেক্টের একই GitHub / Google Drive JSONL storage path ব্যবহার করা হয়।</p>
+      <div class="settings-storage-grid">
+        <div class="settings-storage-card"><span class="storage-logo github-logo">GH</span><div><strong>GitHub</strong><small>{% if config.github_enabled %}Connected{% else %}Not configured{% endif %}</small></div><span class="state-dot {% if config.github_enabled %}online{% else %}offline{% endif %}"></span></div>
+        <div class="settings-storage-card"><span class="storage-logo drive-logo">G</span><div><strong>Google Drive</strong><small>{% if config.drive_enabled %}Connected{% else %}Not configured{% endif %}</small></div><span class="state-dot {% if config.drive_enabled %}online{% else %}offline{% endif %}"></span></div>
+      </div>
+      <div class="info-strip"><span>ⓘ</span><p><strong>Credentials কোথায় পরিবর্তন করবে?</strong><br>GitHub Token ও Google OAuth secret নিরাপত্তার জন্য এই পেজে দেখানো বা সংরক্ষণ করা হয় না। Hosting provider-এর Environment Variables / Secrets থেকে পরিবর্তন করে Redeploy করো। এতে secret browser-এর মাধ্যমে প্রকাশ পায় না।</p></div>
+      <div class="settings-facts"><div><small>Primary storage</small><strong>{{ stats.primary_storage }}</strong></div><div><small>Storage directory</small><strong>{{ config.data_dir }}</strong></div><div><small>Drive files pending</small><strong>{{ stats.drive_pending }}</strong></div><div><small>Shard capacity</small><strong>{{ config.max_records_per_shard }} records / file</strong></div></div>
+    </section>
+
+    <section class="panel settings-section" id="import">
+      <div class="section-icon import-icon">↓</div><div class="section-title"><span class="eyebrow">BRING YOUR DATA</span><h2>Import messages</h2></div>
+      <p class="muted">Telegram Desktop-এর Saved Messages JSON, অথবা এই ওয়েব অ্যাপের আগের JSON / JSONL Export ফাইল Import করো।</p>
+      <div class="import-steps"><div><span>01</span><p>Telegram Desktop → Saved Messages → Export Chat History</p></div><div><span>02</span><p>Machine-readable JSON নির্বাচন করো</p></div><div><span>03</span><p>ফাইলটি নিচে Upload করো</p></div></div>
+      <form method="post" action="/settings/import" enctype="multipart/form-data" class="upload-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label class="upload-zone" for="import-file"><span class="upload-symbol">⇧</span><strong>Choose an export file</strong><small>JSON or JSONL · সর্বোচ্চ {{ config.max_upload_mb }} MB</small><input id="import-file" name="file" type="file" accept=".json,.jsonl,application/json,application/x-ndjson" required></label>
+        <div class="upload-selected" data-file-name>কোনো ফাইল নির্বাচন করা হয়নি</div>
+        <button class="button button-primary" type="submit">Validate & import <span>→</span></button>
+      </form>
+      <div class="info-strip"><span>✓</span><p><strong>Merge, never replace.</strong><br>নতুন মেসেজ যোগ হবে, নতুন edited timestamp থাকলে পুরোনো মেসেজ আপডেট হবে, Duplicate বাদ যাবে এবং অন্য পুরোনো মেসেজ অক্ষত থাকবে। Import-এর আগে বর্তমান Vault-এর Export রেখে নেওয়া ভালো।</p></div>
+    </section>
+
+    <section class="panel settings-section" id="export">
+      <div class="section-icon export-icon">↑</div><div class="section-title"><span class="eyebrow">TAKE YOUR DATA WITH YOU</span><h2>Export entire vault</h2></div>
+      <p class="muted">সক্রিয় ও Trash-এ থাকা সব রেকর্ড Export হবে। JSONL / JSON পূর্ণ metadata রাখে; CSV spreadsheet ব্যবহারের জন্য।</p>
+      <div class="export-options"><a class="export-option" href="/settings/export.jsonl"><span class="export-file">JSONL</span><span><strong>JSON Lines</strong><small>Bot-compatible full backup</small></span><span class="download-arrow">↓</span></a><a class="export-option" href="/settings/export.json"><span class="export-file">JSON</span><span><strong>JSON archive</strong><small>Readable structured export</small></span><span class="download-arrow">↓</span></a><a class="export-option" href="/settings/export.csv"><span class="export-file">CSV</span><span><strong>Spreadsheet</strong><small>Excel / Sheets compatible</small></span><span class="download-arrow">↓</span></a></div>
+    </section>
+
+    <section class="panel settings-section" id="backup">
+      <div class="panel-heading"><div><span class="eyebrow">SECONDARY COPY</span><h2>Google Drive backup</h2></div><span class="badge {% if config.drive_enabled %}badge-success{% else %}badge-muted{% endif %}">{% if config.drive_enabled %}{{ 'Mirror active' if config.github_enabled else 'Primary storage' }}{% else %}Not configured{% endif %}</span></div>
+      {% if config.github_enabled and config.drive_enabled %}<p class="muted">GitHub-এ সফলভাবে Save হওয়ার পর Drive-এ mirror করা হয়। কোনো Drive file pending থাকলে নিচের বাটনে retry করতে পারো। বর্তমানে pending: <strong>{{ stats.drive_pending }}</strong></p>{% elif config.drive_enabled %}<p class="muted">Google Drive-ই Primary Storage। আলাদা secondary backup নেই; প্রতিটি write সরাসরি Drive-এ যায়।</p>{% else %}<p class="muted">Google Drive configure করা নেই। GitHub-এ ডেটা সংরক্ষণ হচ্ছে। চাইলে Environment Variables-এ Drive OAuth credentials যোগ করে উভয় Storage চালু করতে পারো।</p>{% endif %}
+      <form method="post" action="/settings/backup" id="backup-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button button-secondary" type="submit" {% if not config.drive_enabled or not config.github_enabled %}disabled{% endif %}>↻ Retry Drive backup</button></form>
+    </section>
+
+
+
+    <section class="panel settings-section" id="security">
+      <span class="eyebrow">ACCOUNT & SESSION</span><h2>Security settings</h2>
+      <div class="security-list"><div><span class="security-check">✓</span><span><strong>Password-protected website</strong><small>প্রথমবার ওয়েবসাইটে নিজের Workspace Password তৈরি করতে হবে; শুধু salted password verifier private GitHub repository-তে রাখা হয়।</small></span></div><div><span class="security-check">✓</span><span><strong>Signed session cookie + CSRF protection</strong><small>Form submission-এ session-bound CSRF token যাচাই করা হয়।</small></span></div><div><span class="security-check">✓</span><span><strong>Login attempt throttling</strong><small>একটি IP থেকে ১৫ মিনিটে ৫টি ব্যর্থ প্রচেষ্টার পর সাময়িক বিরতি।</small></span></div><div><span class="security-check">✓</span><span><strong>Secrets are not displayed</strong><small>Storage token এবং OAuth credentials browser-এ পাঠানো হয় না।</small></span></div></div>
+      <div class="info-strip"><span>!</span><p><strong>গুরুত্বপূর্ণ:</strong> HTTPS-সহ hosting ব্যবহার করো এবং শক্তিশালী Workspace Password বেছে নাও। Hosting-এর SECRET_KEY স্বয়ংক্রিয়ভাবে তৈরি হবে। Password বা token কখনো Source Repository-তে commit করবে না।</p></div>
+    </section>
+  </div>
+</div>
+{% endblock %}

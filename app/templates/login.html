@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6fa"><title>Sign in · {{ app_title }}</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="login-body">
+  <main class="login-layout">
+    <section class="login-brand-panel">
+      <div class="login-brand"><span class="brand-mark">V</span><strong>{{ app_title }}</strong></div>
+      <div class="login-hero-copy"><span class="eyebrow light-eyebrow">YOUR PRIVATE SPACE</span><h1>Everything you save.<br><em>One quiet place.</em></h1><p>Keep notes, links and imported messages together. Search them whenever you need.</p></div>
+      <div class="login-footnote"><span class="secure-dot"></span> Private, self-hosted storage</div>
+    </section>
+    <section class="login-form-panel">
+      <div class="login-form-card">
+        <div class="login-card-icon">⌑</div>
+        <span class="eyebrow">WELCOME BACK</span>
+        <h2>Sign in to your vault</h2>
+        <p class="muted">তোমার ব্যক্তিগত Vault খুলতে পাসওয়ার্ড দাও।</p>
+        {% if flash %}<div class="flash flash-{{ flash.kind|default('error') }}">{{ flash.message }}</div>{% endif %}
+        <form method="post" action="/login" class="stack-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label for="password">Vault password</label>
+          <input id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required autofocus>
+          <button class="button button-primary button-full" type="submit">Unlock vault <span>→</span></button>
+        </form>
+        <div class="login-security"><span>▣</span> Secure session · HTTPS recommended</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

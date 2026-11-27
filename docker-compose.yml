@@ -1,0 +1,9 @@
+services:
+  personal-vault-web:
+    build: .
+    container_name: personal-vault-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"

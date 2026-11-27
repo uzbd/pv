@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Message details · {{ app_title }}{% endblock %}
+{% block content %}
+<section class="narrow-page">
+  <div class="back-link"><a href="/messages">← All messages</a></div>
+  <div class="page-heading-row"><div><span class="eyebrow">MESSAGE DETAILS</span><h1>Saved record</h1><p class="muted">Original text and message metadata.</p></div>{% if record.is_deleted %}<span class="badge badge-trash large-badge">IN TRASH</span>{% endif %}</div>
+  <article class="panel detail-panel">
+    <div class="detail-meta"><span class="detail-id">{{ record.id }}</span><span>{{ record.created_at|replace('T',' ')|replace('Z',' UTC') }}</span></div>
+    <div class="detail-text">{{ record.text }}</div>
+    {% if record.hashtags %}<div class="tag-row detail-tags">{% for tag in record.hashtags %}<a class="tag-chip" href="/messages?tag={{ tag|urlencode }}">#{{ tag }}</a>{% endfor %}</div>{% endif %}
+    {% if record.links %}<div class="detail-links"><strong>Detected links</strong>{% for link in record.links %}<a href="{{ link if link.startswith('http') else 'https://' ~ link }}" target="_blank" rel="noopener noreferrer">{{ link }} ↗</a>{% endfor %}</div>{% endif %}
+    <div class="metadata-grid"><div><small>Created</small><strong>{{ record.created_at }}</strong></div><div><small>Last updated</small><strong>{{ record.updated_at }}</strong></div><div><small>Edited at</small><strong>{{ record.edited_at or '—' }}</strong></div><div><small>Source</small><strong>{{ record.source or ('Telegram import' if record.telegram_export_message_id else 'Vault') }}</strong></div></div>
+    <div class="detail-actions"><a class="button button-secondary" href="/messages/{{ record.id }}/edit">Edit message</a>{% if record.is_deleted %}<form method="post" action="/messages/{{ record.id }}/restore"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button button-primary" type="submit">Restore message</button></form>{% else %}<form method="post" action="/messages/{{ record.id }}/delete" data-confirm="এই মেসেজটি Trash-এ সরাতে চাও?"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button button-danger" type="submit">Move to trash</button></form>{% endif %}</div>
+  </article>
+</section>
+{% endblock %}

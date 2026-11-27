@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Messages · {{ app_title }}{% endblock %}
+{% block content %}
+<section class="page-heading-row"><div><span class="eyebrow">YOUR ARCHIVE</span><h1>All messages</h1><p class="muted">টেক্সট, Hashtag, Link এবং তারিখ দিয়ে তোমার সংরক্ষিত রেকর্ড খুঁজে নাও।</p></div><a class="button button-primary" href="/messages/new">＋ New note</a></section>
+<section class="panel filters-panel">
+  <form method="get" action="/messages" class="filter-form">
+    <div class="filter-search"><label for="q">Search</label><div class="search-input-wrap"><span>⌕</span><input id="q" name="q" value="{{ query_values.q }}" placeholder="Keyword, exact phrase, hashtag or URL..."></div></div>
+    <div class="filter-small"><label for="tag">Hashtag</label><input id="tag" name="tag" value="{{ query_values.tag }}" placeholder="#travel"></div>
+    <div class="filter-small"><label for="domain">Link / domain</label><input id="domain" name="domain" value="{{ query_values.domain }}" placeholder="example.com"></div>
+    <div class="filter-small"><label for="date">Exact date</label><input id="date" name="date" type="date" value="{{ query_values.date }}"></div>
+    <div class="filter-small"><label for="from_date">From</label><input id="from_date" name="from_date" type="date" value="{{ query_values.from_date }}"></div>
+    <div class="filter-small"><label for="to_date">To</label><input id="to_date" name="to_date" type="date" value="{{ query_values.to_date }}"></div>
+    <label class="check-label"><input type="checkbox" name="show_deleted" value="true" {% if query_values.show_deleted %}checked{% endif %}> Include Trash</label>
+    <div class="filter-actions"><button class="button button-primary" type="submit">Apply filters</button><a class="button button-ghost" href="/messages">Clear</a></div>
+  </form>
+</section>
+<div class="results-heading"><div><strong>{{ total }}</strong> result{% if total != 1 %}s{% endif %}{% if query_values.q %} for “{{ query_values.q }}”{% endif %}</div><span>Newest first · {{ page }} / {{ total_pages }}</span></div>
+{% if records %}
+  <section class="message-cards">
+    {% for record in records %}
+      <article class="message-card {% if record.is_deleted %}message-deleted{% endif %}">
+        <div class="message-card-top"><span class="message-id">{{ record.id }}</span><span class="message-date">{{ record.created_at|replace('T',' ')|replace('Z',' UTC') }}</span>{% if record.is_deleted %}<span class="badge badge-trash">TRASH</span>{% endif %}</div>
+        <a href="/messages/{{ record.id }}" class="message-text-link"><p class="message-text">{{ record.text|truncate(360, True, '…') }}</p></a>
+        {% if record.hashtags %}<div class="tag-row">{% for tag in record.hashtags[:8] %}<a class="tag-chip" href="/messages?tag={{ tag|urlencode }}">#{{ tag }}</a>{% endfor %}</div>{% endif %}
+        {% if record.links %}<div class="link-row">↗ {% for link in record.links[:2] %}<a href="{{ link if link.startswith('http') else 'https://' ~ link }}" target="_blank" rel="noopener noreferrer">{{ link|truncate(60, True, '…') }}</a>{% endfor %}</div>{% endif %}
+        <div class="message-card-actions"><a class="small-action" href="/messages/{{ record.id }}">Open details →</a><a class="small-action" href="/messages/{{ record.id }}/edit">Edit</a>{% if record.is_deleted %}<form method="post" action="/messages/{{ record.id }}/restore"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="small-action" type="submit">Restore</button></form>{% else %}<form method="post" action="/messages/{{ record.id }}/delete" data-confirm="এই মেসেজটি Trash-এ সরাতে চাও?"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="small-action danger-action" type="submit">Move to trash</button></form>{% endif %}</div>
+      </article>
+    {% endfor %}
+  </section>
+  {% if total_pages > 1 %}
+    <nav class="pagination" aria-label="পৃষ্ঠা">
+      {% if page > 1 %}<a class="page-button" href="/messages?{% for key,value in query_values.items() %}{% if value %}{{ key }}={{ value|urlencode }}&{% endif %}{% endfor %}page={{ page - 1 }}">← Previous</a>{% else %}<span class="page-button disabled">← Previous</span>{% endif %}
+      <span>Page {{ page }} of {{ total_pages }}</span>
+      {% if page < total_pages %}<a class="page-button" href="/messages?{% for key,value in query_values.items() %}{% if value %}{{ key }}={{ value|urlencode }}&{% endif %}{% endfor %}page={{ page + 1 }}">Next →</a>{% else %}<span class="page-button disabled">Next →</span>{% endif %}
+    </nav>
+  {% endif %}
+{% else %}
+  <section class="panel empty-results"><div class="empty-icon">⌕</div><h2>কোনো মেসেজ পাওয়া যায়নি</h2><p>অন্য Keyword বা Filter দিয়ে চেষ্টা করো। Trash অন্তর্ভুক্ত আছে কি না সেটিও পরীক্ষা করো।</p><a class="button button-secondary" href="/messages">সব মেসেজ দেখুন</a></section>
+{% endif %}
+{% endblock %}

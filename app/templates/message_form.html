@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }} · {{ app_title }}{% endblock %}
+{% block content %}
+<section class="narrow-page">
+  <div class="back-link"><a href="{% if record %}/messages/{{ record.id }}{% else %}/messages{% endif %}">← Back</a></div>
+  <div class="page-heading"><span class="eyebrow">PERSONAL ARCHIVE</span><h1>{{ form_title }}</h1><p class="muted">টেক্সট, Hashtag এবং URL একসঙ্গে সংরক্ষণ করতে পারো।</p></div>
+  <section class="panel editor-panel">
+    <form method="post" action="{% if record %}/messages/{{ record.id }}/edit{% else %}/messages/new{% endif %}" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label for="text">Message / Note</label>
+      <textarea id="text" name="text" rows="12" maxlength="100000" placeholder="Write something worth keeping..." required>{{ record.text if record else '' }}</textarea>
+      <div class="editor-hint"><span>Hashtags ও URL স্বয়ংক্রিয়ভাবে শনাক্ত হবে।</span><span data-char-count>0 characters</span></div>
+      <div class="form-footer"><a class="button button-ghost" href="{% if record %}/messages/{{ record.id }}{% else %}/messages{% endif %}">Cancel</a><button class="button button-primary" type="submit">{% if record %}Save changes{% else %}Save to vault{% endif %} <span>→</span></button></div>
+    </form>
+  </section>
+  {% if record %}<p class="form-meta">ID: {{ record.id }} · Original date: {{ record.created_at }}</p>{% endif %}
+</section>
+{% endblock %}

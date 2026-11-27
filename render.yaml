@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: personal-vault-web
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_TITLE
+        value: Personal Vault
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: SESSION_MAX_AGE
+        value: "86400"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: VAULT_SETUP_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_OWNER
+        sync: false
+      - key: GITHUB_REPO
+        sync: false
+      - key: GITHUB_BRANCH
+        value: main
+      - key: VAULT_DATA_DIR
+        value: vault-data
+      - key: MAX_RECORDS_PER_SHARD
+        value: "250"
+      - key: MAX_UPLOAD_MB
+        value: "25"
+      - key: LOG_LEVEL
+        value: INFO

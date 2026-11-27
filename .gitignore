@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+credentials.json
+google_token.json
+*.log
+.DS_Store
+
+frontend/node_modules/
+frontend/dist/

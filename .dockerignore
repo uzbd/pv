@@ -1,0 +1,14 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+__pycache__
+.pytest_cache
+*.pyc
+credentials.json
+google_token.json
+*.zip
+
+frontend/node_modules
+frontend/dist
