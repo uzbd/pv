@@ -1,4 +1,4 @@
-# Personal Vault Web 2.3.0
+# Personal Vault Web 2.4.1
 
 **একটি আধুনিক, ব্যক্তিগত ও searchable knowledge workspace — Telegram Bot-এর পরিবর্তে সম্পূর্ণ ওয়েব UI।** কোনো Telegram command টাইপ করতে হবে না। Note, Search, Import, Export, Trash, Backup ও Security—সবকিছু ওয়েবসাইটের UI এবং Settings-এর ভেতর থেকে পরিচালিত হয়।
 
@@ -27,13 +27,15 @@ Deploy শেষ হলে প্রথমবারের **Create your private 
 
 ---
 
-## What changed in 2.3.0
+## What changed in 2.4.1
 
-- Telegram-inspired Saved Messages chat with message bubbles, search, send/edit/delete, chronological date dividers and older-message pagination that retains scroll position.
-- Mobile-first chat layout with safe-area support, a pinned composer and mobile-sized touch controls.
-- Separate Dashboard and Chat interface/text size controls, persisted locally; Android/browser system UI fonts are the default.
-- First-run setup no longer collects a GitHub PAT in the browser. It uses a separate one-time `VAULT_SETUP_KEY` and validates its minimum length.
-- No external font, image, analytics or UI-CDN dependencies were added; the chat wallpaper is CSS-only.
+- Rebuilt Saved Messages as a full-screen, dark-blue, mobile-first chat interface matching the approved mockup: category tabs, search, blue message bubbles, composer, emoji picker and bottom Text Size / Theme / Settings controls.
+- Chat is now the landing screen after login; Dashboard, Library, Trash and Settings remain available from the navigation drawer.
+- Removed successful-save toasts and secondary explanatory copy; error feedback remains visible.
+- Improved chat scroll handling after sends/searches, keyboard shortcuts, mobile safe areas and independent chat text scaling.
+- Added a working Links category and corrected the API's `only_deleted` filter.
+- Media and Files tabs are shown but disabled because the current Vault storage format stores text notes and links only; no fake attachment controls are exposed.
+- First-run setup continues to use the server-side `VAULT_SETUP_KEY`; the browser never receives the GitHub PAT.
 
 ## Build fix in 2.2.1
 

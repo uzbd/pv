@@ -816,14 +816,17 @@ async def api_dashboard(request: Request):
 @api_private.get("/messages")
 async def api_messages(
     request: Request, q: str = "", tag: str = "", domain: str = "",
-    date: str = "", from_date: str = "", to_date: str = "",
+    date: str = "", from_date: str = "", to_date: str = "", kind: str = "",
     include_deleted: bool = False, only_deleted: bool = False, page: int = 1, per_page: int = 24,
 ):
+    kind = kind.casefold().strip()
+    if kind not in ("", "links"):
+        raise HTTPException(status_code=422, detail="This content category is not supported by the current text-only vault")
     storage = _get_storage(request)
     qn, tag_n, domain_n = q.casefold().strip(), tag.casefold().strip().lstrip("#"), domain.casefold().strip()
     filtered: list[dict[str, Any]] = []
     for record in storage.all_records(include_deleted=True):
-        if record.get("is_deleted") and not include_deleted:
+        if record.get("is_deleted") and not (include_deleted or only_deleted):
             continue
         if only_deleted and not record.get("is_deleted"):
             continue
@@ -836,6 +839,8 @@ async def api_messages(
         if tag_n and tag_n not in tags:
             continue
         if domain_n and not any(domain_n in link for link in links):
+            continue
+        if kind == "links" and not links:
             continue
         if date and created_date != date:
             continue

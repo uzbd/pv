@@ -188,3 +188,29 @@ def test_first_run_password_setup_is_persisted_in_private_repo(monkeypatch):
         assert old_password.status_code == 401
         new_password = client.post("/api/auth/login", json={"password": "another-very-long-private-password"}, headers=headers)
         assert new_password.status_code == 200
+
+
+def test_api_link_category_and_only_deleted_filter(monkeypatch):
+    client, _storage = setup_client(monkeypatch)
+    with client:
+        csrf = client.get("/api/auth/session").json()["csrf_token"]
+        login = client.post("/api/auth/login", json={"password": "a-strong-test-password", "csrf_token": csrf})
+        headers = {"X-CSRF-Token": login.json()["csrf_token"]}
+        with_link = client.post("/api/messages", json={"text": "Useful resource https://example.com"}, headers=headers).json()["record"]
+        without_link = client.post("/api/messages", json={"text": "Just a note"}, headers=headers).json()["record"]
+
+        links = client.get("/api/messages", params={"kind": "links"})
+        assert links.status_code == 200
+        assert [item["id"] for item in links.json()["records"]] == [with_link["id"]]
+        assert client.get("/api/messages", params={"kind": "media"}).status_code == 422
+        assert client.get("/api/messages", params={"kind": "files"}).status_code == 422
+        assert client.get("/api/messages", params={"kind": "unknown"}).status_code == 422
+
+        assert client.delete(f"/api/messages/{with_link['id']}", headers=headers).status_code == 200
+        deleted = client.get("/api/messages", params={"only_deleted": "true"})
+        assert deleted.status_code == 200
+        assert [item["id"] for item in deleted.json()["records"]] == [with_link["id"]]
+
+        active = client.get("/api/messages", params={"only_deleted": "false"})
+        assert active.status_code == 200
+        assert [item["id"] for item in active.json()["records"]] == [without_link["id"]]

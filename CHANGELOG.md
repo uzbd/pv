@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.4.1
+- Increased default chat text sizing and improved narrow-screen fit.
+- Tightened secondary-page control and typography sizing while keeping descriptions hidden.
+- Removed the misleading always-green storage status dot.
+- Validate unsupported message categories consistently before querying storage.
+
+
+## 2.4.0 — Mockup-matched mobile Saved Messages UI
+- Rebuilt the primary Saved Messages screen as a full-screen dark-blue mobile interface with category tabs, search, message bubbles, composer, emoji picker and bottom Text Size / Theme / Settings controls.
+- Made Saved Messages the post-login landing screen; Dashboard, Library, Trash and Settings remain accessible from the navigation drawer.
+- Removed success toasts and secondary explanatory copy while preserving error feedback.
+- Improved scroll-to-bottom after sending, scroll behavior during older-page loading, and `/` / Ctrl+K search focus.
+- Added the Links category to the messages API and fixed `only_deleted=true` so Trash queries include deleted records even when `include_deleted` is omitted.
+- Media and Files tabs remain visible but disabled because the current text-only storage schema does not store attachments.
+
+
 ## 2.3.0 — Saved Messages mobile-first redesign
 - Added a Telegram-inspired Saved Messages chat interface with search, send, edit, delete, date separators and paged history.
 - Added separate device-local Dashboard and Chat size controls.

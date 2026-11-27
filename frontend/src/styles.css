@@ -194,3 +194,281 @@ body{min-height:100vh;min-height:100dvh;}
 .telegram-composer textarea{font:inherit;line-height:1.4;}
 .telegram-composer textarea::placeholder{font:inherit;}
 @media(max-width:650px){.main-column{min-height:100vh;min-height:100dvh}.page-content-chat{flex:1}.telegram-thread{overscroll-behavior-y:contain}.telegram-composer textarea{font-size:16px;} .telegram-message-actions{opacity:1}.telegram-message-actions button{min-width:30px;min-height:32px}}
+
+/* Personal Vault 2.4 — Saved Messages mobile-first interface */
+:root{font-family:Roboto,"Noto Sans Bengali","Noto Sans",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px; text-size-adjust:100%;-webkit-text-size-adjust:100%}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#081426;--surface:#101f34;--surface-soft:#14253d;--surface-muted:#192c46;--text:#e8efff;--text-strong:#f8fbff;--muted:#a7b7d2;--muted-2:#8294b2;--line:#253952;--line-strong:#344c6b;--brand:#2788ff;--brand-strong:#126de0;--brand-soft:#142f55;--green:#62d39b;--green-soft:#153b32;--amber:#f4c36e;--amber-soft:#3a2d1a;--red:#ff8a9b;--red-soft:#3d1e2b;--shadow:0 8px 30px rgba(0,0,0,.24)}
+:root[data-theme="dark"] body{background:#081426;color:#e8efff}
+
+/* Keep secondary pages clean and remove helper/description copy. */
+.app-shell .eyebrow,
+.app-shell .workspace-chip small,
+.app-shell .sidebar-storage small,
+.app-shell .user-copy span,
+.app-shell .settings-tab small,
+.app-shell .stat-detail,
+.app-shell .provider-copy span,
+.app-shell .provider-large-copy span,
+.app-shell .productivity-strip,
+.app-shell .empty-state p,
+.app-shell .welcome-row p,
+.app-shell .card-heading p,
+.app-shell .page-title-row>div>p,
+.app-shell .settings-panel p,
+.app-shell .settings-panel .section-heading p,
+.app-shell .editor-footer>span,
+.app-shell .login-subtitle,
+.app-shell .login-privacy,
+.login-screen .login-headline p,
+.login-screen .login-art-foot,
+.login-screen .login-form-wrap>p{display:none!important}
+.app-shell .error-panel p{display:block!important}
+.app-shell .sidebar-user .user-copy{gap:0}
+.app-shell .section-heading{margin-bottom:20px}
+.app-shell .settings-tab{min-height:48px}
+.app-shell .settings-tab>span{gap:0}
+.app-shell .settings-panel .tip-panel,
+.app-shell .settings-panel .env-note,
+.app-shell .settings-panel .merge-info{padding-top:12px;padding-bottom:12px}
+.app-shell .chat-mode .page-content-chat{zoom:1!important}
+
+/* The Saved Messages view occupies the complete app viewport. */
+.app-shell.chat-mode{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+.app-shell.chat-mode .sidebar{display:none}
+.app-shell.chat-mode .sidebar.sidebar-open{display:flex;z-index:110;transform:none;box-shadow:0 20px 60px #0008}
+.app-shell.chat-mode .mobile-scrim{position:fixed;inset:0;z-index:109;background:#020817a8;border:0}
+.app-shell.chat-mode .main-column{height:100vh;height:100dvh;min-height:0;margin-left:0;width:100%;display:flex;flex-direction:column}
+.app-shell.chat-mode .topbar,.app-shell.chat-mode .app-footer{display:none!important}
+.app-shell.chat-mode .page-content-chat{height:100vh;height:100dvh;min-height:0;max-height:none;flex:1;padding:0;overflow:hidden;zoom:1}
+.vault-chat-screen{--chat-blue:#1682ff;--chat-blue-strong:#0868e8;--chat-shell:#0b1a30;--chat-panel:#10223b;--chat-edge:#263a56;display:flex;flex-direction:column;width:100%;height:100%;min-height:0;overflow:hidden;color:#f5f8ff;background:linear-gradient(150deg,#0a1930 0%,#081426 58%,#0b1c34 100%);font-size:calc(16px * var(--chat-scale,1.2));}
+.vault-chat-header{display:flex;align-items:center;gap:12px;min-height:76px;padding:calc(10px + env(safe-area-inset-top)) clamp(14px,3.5vw,28px) 10px;background:linear-gradient(110deg,#0d203a 0%,#102747 58%,#10213b 100%);border-bottom:1px solid #213852;flex:none}
+.vault-header-icon{width:44px;height:44px;flex:none;border:0;border-radius:50%;display:grid;place-items:center;background:transparent;color:#edf5ff}
+.vault-header-icon svg{width:25px;height:25px;stroke-width:2}
+.vault-header-icon:active{background:#ffffff15;transform:scale(.96)}
+.vault-brand-mark{width:54px;height:54px;flex:none;display:grid;place-items:center;border-radius:17px;background:linear-gradient(145deg,#188cff,#0754d9);box-shadow:0 7px 22px #006cff52;color:white}
+.vault-brand-mark svg{width:29px;height:29px;stroke-width:2.2}
+.vault-brand-title{min-width:0;flex:1;font-size:clamp(21px,4.7vw,27px);font-weight:750;letter-spacing:-.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vault-header-actions{display:flex;align-items:center;gap:3px}
+.vault-menu-wrap{position:relative}
+.vault-menu-dismiss{position:fixed;inset:0;z-index:30;border:0;background:transparent}
+.vault-overflow-menu{position:absolute;right:0;top:48px;z-index:31;width:190px;padding:7px;border:1px solid #304663;border-radius:15px;background:#142640;box-shadow:0 12px 35px #0008}
+.vault-overflow-menu button{width:100%;display:flex;align-items:center;gap:12px;padding:12px;border:0;border-radius:10px;background:transparent;color:#f4f7ff;text-align:left;font:inherit;font-size:.9em}
+.vault-overflow-menu button svg{width:18px;height:18px;color:#91bdf2}
+.vault-overflow-menu button:active{background:#ffffff12}
+.vault-category-tabs{display:flex;align-items:center;gap:9px;padding:12px clamp(14px,3.5vw,28px);background:#0d1d33;overflow-x:auto;scrollbar-width:none;flex:none}
+.vault-category-tabs::-webkit-scrollbar{display:none}
+.vault-category-tabs button{min-width:0;flex:1;display:flex;align-items:center;justify-content:center;gap:9px;min-height:52px;padding:0 17px;border:1px solid #2b405e;border-radius:999px;background:#0c1a2f;color:#e0e9f8;white-space:nowrap;font:inherit;font-size:.94em;font-weight:550}
+.vault-category-tabs button svg{width:21px;height:21px;flex:none}
+.vault-category-tabs button.active{border-color:#1682ff;background:linear-gradient(135deg,#167dff,#1766e6);color:#fff;box-shadow:0 5px 18px #086bf04a}
+.vault-search-bar{display:flex;align-items:center;gap:12px;min-height:62px;margin:4px clamp(14px,3.5vw,28px) 12px;padding:0 19px;border:1px solid #354966;border-radius:999px;background:#0d1b30;color:#a9bad4;flex:none}
+.vault-search-bar>svg{width:24px;height:24px;flex:none}
+.vault-search-bar input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#f6f9ff;font:inherit;font-size:.98em}
+.vault-search-bar input::placeholder{color:#a4b3cb;opacity:1}
+.vault-search-bar button{border:0;background:transparent;color:#b7c8df;padding:6px;display:grid;place-items:center}
+.vault-search-bar button svg{width:21px;height:21px}
+.vault-chat-thread{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;display:flex;flex-direction:column;gap:3px;padding:6px clamp(12px,3.5vw,38px) 16px;background-color:#09172a;background-image:radial-gradient(circle at 1px 1px,#7690b117 1px,transparent 0);background-size:22px 22px;scrollbar-width:thin;scrollbar-color:#395170 transparent}
+.vault-chat-thread .page-loading{margin:auto;color:#c7d7ed}
+.vault-chat-thread .error-panel{margin:auto;background:#182a43;border-color:#573e52;color:#fff}
+.telegram-message-group{width:100%;display:flex;flex-direction:column;gap:5px}
+.telegram-date-separator{display:flex;justify-content:center;margin:12px 0 8px}
+.telegram-date-separator span{padding:7px 16px;border:1px solid #33445f;border-radius:999px;background:#27334a;color:#f1f5fc;font-size:.82em;font-weight:650;box-shadow:0 2px 8px #0002}
+.telegram-message-row{display:flex;justify-content:flex-end;align-items:flex-end;width:100%;gap:8px}
+.telegram-message-bubble{position:relative;display:flex;align-items:flex-end;gap:5px;max-width:min(88%,780px);min-width:90px;padding:0;border:1px solid #368fff;background:linear-gradient(135deg,#167cf5,#1768df);border-radius:18px 18px 5px 18px;box-shadow:0 3px 13px #0055c833;color:#fff;overflow:hidden}
+.telegram-message-content{display:block;min-width:0;padding:12px 13px 8px;border:0;background:transparent;color:inherit;text-align:left;font:inherit;flex:1}
+.telegram-message-text{display:block;font-size:1em;line-height:1.48;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+.telegram-message-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+.telegram-message-tags span{color:#d5eaff;font-size:.78em}
+.telegram-message-meta{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:4px;color:#c5e0ff;font-size:.68em;line-height:1.2}
+.telegram-message-meta svg{width:15px;height:15px;color:#d6edff;stroke-width:2.5}
+.telegram-message-actions{display:flex;align-items:center;gap:2px;padding-right:5px;opacity:0;transition:opacity .15s}
+.telegram-message-bubble:hover .telegram-message-actions,.telegram-message-bubble:focus-within .telegram-message-actions{opacity:1}
+.telegram-message-actions button{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:50%;background:#ffffff19;color:#fff}
+.telegram-message-actions button svg{width:16px;height:16px}
+.telegram-message-actions button:active{background:#ffffff35}
+.vault-older{display:flex;justify-content:center;margin:4px 0 12px}
+.vault-older button{min-height:38px;padding:7px 16px;border:1px solid #344967;border-radius:999px;background:#152945;color:#dce9fa;font:inherit;font-size:.78em}
+.vault-empty-state{margin:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:30px 16px;color:#dbe8fa;text-align:center}
+.vault-empty-state>svg{width:56px;height:56px;padding:15px;border-radius:50%;background:#153761;color:#7bb9ff}
+.vault-empty-state strong{font-size:1.08em;font-weight:650}
+.vault-composer{position:relative;display:flex;align-items:flex-end;gap:9px;padding:12px clamp(10px,2.7vw,22px) max(12px,env(safe-area-inset-bottom));border-top:1px solid #233955;background:#0c1b31;flex:none}
+.vault-composer-icon{width:48px;height:48px;flex:none;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:#e8f2ff}
+.vault-composer-icon svg{width:27px;height:27px}
+.vault-composer-input-wrap{position:relative;flex:1;min-width:0;min-height:50px;display:flex;align-items:flex-end;padding:5px 8px 5px 16px;border:1.5px solid #3a4e6d;border-radius:28px;background:#101f35}
+.vault-composer-input-wrap textarea{width:100%;min-width:0;max-height:160px;min-height:38px;resize:none;overflow-y:auto;padding:8px 3px;border:0;outline:0;background:transparent;color:#f6f9ff;font:inherit;font-size:1em;line-height:1.35}
+.vault-composer-input-wrap textarea::placeholder{color:#9eacc4;opacity:1}
+.vault-emoji-wrap{position:relative;flex:none}
+.vault-emoji-button{width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:#e1ecfa}
+.vault-emoji-button svg{width:24px;height:24px}
+.vault-emoji-picker{position:absolute;right:0;bottom:48px;z-index:25;width:220px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:9px;border:1px solid #3a506e;border-radius:16px;background:#132640;box-shadow:0 12px 36px #0008}
+.vault-emoji-picker button{height:42px;border:0;border-radius:9px;background:transparent;font-size:24px}
+.vault-emoji-picker button:active{background:#ffffff16}
+.vault-send-button{width:54px;height:54px;flex:none;display:grid;place-items:center;border:0;border-radius:50%;background:linear-gradient(145deg,#2493ff,#0871ed);color:white;box-shadow:0 4px 15px #0879f04a}
+.vault-send-button svg{width:24px;height:24px;fill:transparent;stroke-width:2.2}
+.vault-send-button:disabled{opacity:.46;box-shadow:none}
+.vault-bottom-dock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;min-height:66px;padding:5px 8px max(5px,env(safe-area-inset-bottom));border-top:1px solid #263a56;background:#102039;flex:none}
+.vault-dock-item{position:relative;min-width:0;display:flex;align-items:center;justify-content:center;border-right:1px solid #43536b}
+.vault-dock-item:last-child{border-right:0}
+.vault-dock-item>button{width:100%;height:100%;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 4px;border:0;border-radius:9px;background:transparent;color:#e8f1ff;font:inherit;font-size:.78em;white-space:nowrap}
+.vault-dock-item>button:active{background:#ffffff12}
+.vault-dock-item>button svg{width:19px;height:19px;flex:none}
+.vault-dock-item>button>svg:last-child{width:15px;height:15px;color:#a9bdd9}
+.vault-aa{font-size:1.3em;font-weight:750;letter-spacing:-1px}
+.vault-dock-symbol{display:grid;place-items:center}
+.vault-size-popover{position:absolute;left:50%;bottom:calc(100% + 10px);z-index:28;transform:translateX(-50%);width:min(310px,90vw);display:flex;align-items:center;gap:8px;padding:11px;border:1px solid #3b5272;border-radius:15px;background:#142943;box-shadow:0 12px 36px #0009}
+.vault-size-popover button{width:38px;height:38px;flex:none;border:1px solid #3b5272;border-radius:9px;background:#1b3554;color:white;font:inherit;font-weight:700}
+.vault-size-popover input{width:100%;min-width:70px;accent-color:#278cff}
+.vault-size-popover output{min-width:42px;color:#f3f7ff;font-size:.75em;text-align:right;font-variant-numeric:tabular-nums}
+.mini-spinner{width:18px;height:18px;border:2px solid #ffffff65;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+
+/* Mobile sizing and safe areas. */
+@media(max-width:650px){
+  .vault-chat-header{min-height:68px;gap:9px;padding-left:10px;padding-right:9px}
+  .vault-header-icon{width:39px;height:42px}
+  .vault-header-icon svg{width:24px;height:24px}
+  .vault-brand-mark{width:48px;height:48px;border-radius:15px}
+  .vault-brand-mark svg{width:26px;height:26px}
+  .vault-brand-title{font-size:clamp(20px,5.4vw,24px)}
+  .vault-category-tabs{gap:7px;padding:10px 10px 11px}
+  .vault-category-tabs button{min-height:48px;gap:7px;padding:0 11px;font-size:.88em}
+  .vault-category-tabs button svg{width:19px;height:19px}
+  .vault-search-bar{min-height:54px;margin:3px 10px 9px;padding:0 15px}
+  .vault-search-bar>svg{width:22px;height:22px}
+  .vault-chat-thread{padding:4px 9px 11px}
+  .telegram-message-bubble{max-width:91%;}
+  .telegram-message-content{padding:11px 12px 7px}
+  .telegram-message-actions{opacity:1;padding-right:4px}
+  .telegram-message-actions button{width:29px;height:34px;background:#ffffff18}
+  .vault-composer{gap:5px;padding:8px 7px 8px}
+  .vault-composer-icon{width:39px;height:46px}
+  .vault-composer-icon svg{width:25px;height:25px}
+  .vault-composer-input-wrap{min-height:48px;padding-left:13px;padding-right:5px}
+  .vault-composer-input-wrap textarea{font-size:16px;min-height:36px}
+  .vault-emoji-button{width:34px;height:36px}
+  .vault-emoji-button svg{width:22px;height:22px}
+  .vault-send-button{width:49px;height:49px}
+  .vault-send-button svg{width:22px;height:22px}
+  .vault-bottom-dock{min-height:61px;padding-left:4px;padding-right:4px}
+  .vault-dock-item>button{gap:5px;font-size:.74em}
+  .vault-dock-item>button svg{width:17px;height:17px}
+}
+@media(max-width:370px){
+  .vault-chat-header{gap:5px;padding-left:6px;padding-right:5px}
+  .vault-header-icon{width:34px}
+  .vault-brand-mark{width:42px;height:42px}
+  .vault-brand-title{font-size:19px}
+  .vault-category-tabs button{gap:5px;padding:0 8px;font-size:.81em}
+  .vault-category-tabs button svg{width:17px;height:17px}
+  .vault-dock-item>button{gap:3px;font-size:.68em}
+}
+@media(prefers-reduced-motion:reduce){.vault-header-icon,.vault-message-actions,.mini-spinner{transition:none;animation:none}}
+
+.app-shell .modal-heading p{display:none!important}
+.app-shell .settings-panel .muted-hint{display:none!important}
+.app-shell .login-panel-footer{display:none!important}
+
+.vault-category-tabs button.vault-tab-unavailable{opacity:.5;cursor:not-allowed;border-style:dashed}
+.vault-category-tabs button.vault-tab-unavailable:active{background:#0c1a2f}
+
+.app-shell .empty-inline,.app-shell .export-card span,.app-shell .security-item>div>span,
+.app-shell .drop-zone>span,.app-shell .drop-zone>small,.app-shell .login-help,
+.app-shell .settings-sidebar-label{display:none!important}
+.app-shell.chat-mode .sidebar .sidebar-top{min-height:64px}
+
+.app-shell .app-footer span:nth-child(2){display:none!important}
+
+
+/* Light theme counterpart; the chat theme toggle changes the entire screen. */
+.vault-light-theme{background:linear-gradient(150deg,#f6f9ff 0%,#edf3fb 58%,#e8f0fb 100%);color:#17263b}
+.vault-light-theme .vault-chat-header{background:linear-gradient(110deg,#fff 0%,#f4f8ff 100%);border-bottom-color:#d9e3f1;color:#182840}
+.vault-light-theme .vault-header-icon{color:#263c59}
+.vault-light-theme .vault-header-icon:active{background:#18284012}
+.vault-light-theme .vault-category-tabs{background:#f5f8fd}
+.vault-light-theme .vault-category-tabs button{border-color:#d2deed;background:#fff;color:#243a56}
+.vault-light-theme .vault-category-tabs button.active{border-color:#1682ff;background:linear-gradient(135deg,#167dff,#1766e6);color:#fff}
+.vault-light-theme .vault-search-bar{border-color:#d1ddec;background:#fff;color:#5c7190}
+.vault-light-theme .vault-search-bar input{color:#17263b}
+.vault-light-theme .vault-search-bar input::placeholder{color:#8091a9}
+.vault-light-theme .vault-search-bar button{color:#60738e}
+.vault-light-theme .vault-chat-thread{background-color:#eaf1fa;background-image:radial-gradient(circle at 1px 1px,#607fa41a 1px,transparent 0);scrollbar-color:#a5b6ca transparent}
+.vault-light-theme .telegram-date-separator span{border-color:#d5dfeb;background:#e1eaf5;color:#2c405b}
+.vault-light-theme .vault-composer{border-top-color:#d4dfec;background:#f7f9fd}
+.vault-light-theme .vault-composer-icon{color:#3c5675}
+.vault-light-theme .vault-composer-input-wrap{border-color:#cbd8e8;background:#fff}
+.vault-light-theme .vault-composer-input-wrap textarea{color:#182840}
+.vault-light-theme .vault-composer-input-wrap textarea::placeholder{color:#7b8da7}
+.vault-light-theme .vault-emoji-button{color:#405b7b}
+.vault-light-theme .vault-bottom-dock{border-top-color:#d4dfec;background:#fff}
+.vault-light-theme .vault-dock-item{border-right-color:#d6dfec}
+.vault-light-theme .vault-dock-item>button{color:#263c59}
+.vault-light-theme .vault-dock-item>button:active{background:#1b4e8510}
+.vault-light-theme .vault-dock-item>button>svg:last-child{color:#7186a3}
+.vault-light-theme .vault-empty-state{color:#263c59}
+.vault-light-theme .vault-empty-state>svg{background:#deebfb;color:#247de2}
+.vault-light-theme .vault-older button{border-color:#cbd8e8;background:#fff;color:#38516f}
+.vault-light-theme .telegram-message-bubble{border-color:#1682ff;background:linear-gradient(135deg,#2488f7,#1768df);color:#fff}
+.vault-light-theme .vault-overflow-menu{border-color:#d2deec;background:#fff;box-shadow:0 12px 35px #213b5c25}
+.vault-light-theme .vault-overflow-menu button{color:#203650}
+.vault-light-theme .vault-overflow-menu button svg{color:#2879d5}
+.vault-light-theme .vault-overflow-menu button:active{background:#eaf2fc}
+.vault-light-theme .vault-size-popover{border-color:#d2deec;background:#fff;box-shadow:0 12px 36px #213b5c25}
+.vault-light-theme .vault-size-popover button{border-color:#d0ddec;background:#f1f6fc;color:#203650}
+.vault-light-theme .vault-size-popover output{color:#203650}
+.vault-light-theme .vault-emoji-picker{border-color:#d2deec;background:#fff;box-shadow:0 12px 36px #213b5c25}
+.vault-light-theme .vault-emoji-picker button:active{background:#eaf2fc}
+
+:root[data-theme="dark"] .vault-chat-screen .telegram-message-bubble{border-color:#368fff;background:linear-gradient(135deg,#167cf5,#1768df);color:#fff}
+:root[data-theme="dark"] .vault-chat-screen .telegram-message-tags span{color:#d5eaff}
+:root[data-theme="dark"] .vault-chat-screen .telegram-message-meta{color:#c5e0ff}
+:root[data-theme="dark"] .vault-chat-screen .telegram-message-meta svg{color:#d6edff}
+@media(max-width:650px){.vault-chat-screen .telegram-message-actions{opacity:1;gap:2px}.vault-chat-screen .telegram-message-actions button{width:27px;height:31px;background:#ffffff20}}
+
+
+/* Final fit-and-finish: readable controls without horizontal overflow. */
+.vault-chat-screen{font-size:calc(16px * var(--chat-scale,1.2));}
+.vault-search-bar input{font-size:1em;}
+.vault-category-tabs button{font-size:.98em;}
+.vault-dock-item>button{font-size:.82em;}
+.vault-size-popover output{font-size:.82em;}
+.vault-empty-state strong{font-size:1.12em;}
+.vault-older button{font-size:.9em;min-height:40px;}
+.app-shell:not(.chat-mode) .nav-item{font-size:14px;min-height:44px;}
+.app-shell:not(.chat-mode) .button{font-size:14px;min-height:42px;}
+.app-shell:not(.chat-mode) .button-sm{font-size:13px;min-height:36px;}
+.app-shell:not(.chat-mode) .badge{font-size:11px;padding:6px 9px;}
+.app-shell:not(.chat-mode) .stat-label{font-size:13px;}
+.app-shell:not(.chat-mode) .stat-value{font-size:28px;}
+.app-shell:not(.chat-mode) .note-main>strong,.app-shell:not(.chat-mode) .recent-copy strong{font-size:15px;line-height:1.45;}
+.app-shell:not(.chat-mode) .note-meta,.app-shell:not(.chat-mode) .recent-copy span{font-size:13px;}
+.app-shell:not(.chat-mode) .field,.app-shell:not(.chat-mode) input,.app-shell:not(.chat-mode) textarea{font-size:16px;}
+.app-shell:not(.chat-mode) .sidebar .icon-button svg{width:20px;height:20px;}
+.app-shell.chat-mode .sidebar .nav-item{font-size:14px;min-height:48px;}
+@media(max-width:650px){
+  .vault-chat-header{padding-top:max(8px,env(safe-area-inset-top));}
+  .vault-category-tabs{gap:6px;padding-left:8px;padding-right:8px;}
+  .vault-category-tabs button{padding-left:7px;padding-right:7px;font-size:.92em;min-height:50px;}
+  .vault-dock-item>button{font-size:.76em;}
+  .vault-chat-screen .telegram-message-text{font-size:1.02em;}
+  .app-shell:not(.chat-mode) .page-content{padding:22px 14px 34px;}
+  .app-shell:not(.chat-mode) .welcome-row,.app-shell:not(.chat-mode) .page-title-row{align-items:flex-start;flex-direction:column;gap:14px;}
+  .app-shell:not(.chat-mode) .welcome-actions,.app-shell:not(.chat-mode) .title-actions{width:100%;flex-wrap:wrap;}
+  .app-shell:not(.chat-mode) .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:370px){
+  .vault-chat-header{gap:4px;padding-left:4px;padding-right:4px;}
+  .vault-header-icon{width:32px;}
+  .vault-brand-mark{width:40px;height:40px;}
+  .vault-brand-title{font-size:18px;}
+  .vault-category-tabs button{gap:4px;padding-left:5px;padding-right:5px;font-size:.84em;}
+  .vault-category-tabs button svg{width:16px;height:16px;}
+  .vault-dock-item>button{gap:2px;font-size:.68em;}
+}
+
+.app-shell .brand-text span{display:none!important}
+
+@media(max-width:650px){.vault-composer{padding-bottom:8px!important}}
+@media(max-width:650px){
+  .vault-composer-input-wrap textarea{font-size:max(16px,1em)!important;}
+  .vault-emoji-button{width:38px;height:40px;}
+  .vault-chat-screen .telegram-message-actions button{width:32px;height:36px;}
+  .vault-header-icon{width:40px;height:44px;}
+}
