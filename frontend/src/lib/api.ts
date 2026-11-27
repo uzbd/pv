@@ -1,4 +1,4 @@
-import type { DashboardData, MessageResult, SettingsData, VaultRecord } from '../types'
+import type { MessageResult, VaultRecord } from '../types'
 
 let csrfToken = ''
 
@@ -19,7 +19,9 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   const payload = contentType.includes('application/json') ? await response.json() : null
   if (!response.ok) {
     const message = payload?.detail || `Request failed (${response.status})`
-    if (response.status === 401 && !path.startsWith('/api/auth/login')) window.location.assign('/login')
+    if (response.status === 401 && !path.startsWith('/api/auth/login') && !path.startsWith('/api/auth/setup')) {
+      window.location.assign('/login')
+    }
     throw new Error(message)
   }
   return payload as T
@@ -32,22 +34,24 @@ export async function loadSession() {
 }
 
 export const api = {
-  dashboard: () => request<DashboardData>('/api/dashboard'),
-  settings: () => request<SettingsData>('/api/settings'),
-  messages: (params: URLSearchParams) => request<MessageResult>(`/api/messages?${params.toString()}`),
-  createMessage: (text: string) => request<{ ok: boolean; record: VaultRecord }>('/api/messages', { method: 'POST', body: JSON.stringify({ text }) }),
-  editMessage: (id: string, text: string) => request<{ ok: boolean; record: VaultRecord }>(`/api/messages/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ text }) }),
-  deleteMessage: (id: string) => request<{ ok: boolean }>(`/api/messages/${encodeURIComponent(id)}`, { method: 'DELETE' }),
-  restoreMessage: (id: string) => request<{ ok: boolean }>(`/api/messages/${encodeURIComponent(id)}/restore`, { method: 'POST' }),
-  backup: () => request<{ ok: boolean; message: string; success: number; failed: number }>('/api/settings/backup', { method: 'POST' }),
-  changePassword: (current_password: string, new_password: string, confirm_password: string) => request<{ ok: boolean; csrf_token: string }>('/api/auth/password', { method: 'POST', body: JSON.stringify({ current_password, new_password, confirm_password }) }),
+  messages: (page = 1, perPage = 100) => {
+    const params = new URLSearchParams({ page: String(page), per_page: String(perPage) })
+    return request<MessageResult>(`/api/messages?${params.toString()}`)
+  },
+  createMessage: (text: string) => request<{ ok: boolean; record: VaultRecord }>('/api/messages', {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  }),
   importFile: (file: File) => {
     const body = new FormData()
     body.append('file', file)
-    return request<{ ok: boolean; source: string; added: number; updated: number; skipped: number; ignored: number; storage?: string }>('/api/settings/import', { method: 'POST', body })
+    return request<{ ok: boolean; source: string; added: number; updated: number; skipped: number; ignored: number; storage?: string }>('/api/settings/import', {
+      method: 'POST',
+      body,
+    })
   },
 }
 
-export function downloadExport(format: 'json' | 'jsonl' | 'csv') {
-  window.location.assign(`/api/settings/export.${format}`)
+export function downloadExport() {
+  window.location.assign('/api/settings/export.jsonl')
 }

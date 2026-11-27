@@ -1,175 +1,67 @@
-# Personal Vault Web 2.4.1
+# Personal Vault Web 2.5.0
 
-**একটি আধুনিক, ব্যক্তিগত ও searchable knowledge workspace — Telegram Bot-এর পরিবর্তে সম্পূর্ণ ওয়েব UI।** কোনো Telegram command টাইপ করতে হবে না। Note, Search, Import, Export, Trash, Backup ও Security—সবকিছু ওয়েবসাইটের UI এবং Settings-এর ভেতর থেকে পরিচালিত হয়।
+A lightweight, mobile-first chat page for saving plain-text notes and messages. The home page is only the chat room. Its Settings sheet contains exactly three controls: **Text Scaling**, **Export**, and **Import**.
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+- AMOLED black background (`#000000`) with grayscale controls and message bubbles.
+- All UI text follows one Text Scaling setting (80%–150%); the preference is saved in the browser.
+- Messages appear immediately using an optimistic bubble while the server saves them.
+- The page loads recent messages first and automatically loads older messages when you scroll to the top.
+- Export downloads one JSONL file compatible with the Telegram Personal Vault Bot's shard format.
+- Import accepts Telegram Desktop Saved Messages JSON and Personal Vault JSON/JSONL exports.
+- No sidebar, dashboard, search panel, theme switcher, attachment controls, third-party fonts, analytics, or UI framework is included.
 
-> Render-এ Deploy করার আগে GitHub-এ এই Source Repository upload করো এবং Render-কে সেটি access করার অনুমতি দাও। উপরের বাটনটি Render-এর Blueprint deployment খুলবে; Render যদি browser referrer থেকে source repo চিনতে না পারে, তাহলে এই Source Repository নির্বাচন করবে।
+## Storage modes
 
-## একবার Deploy করার পর কী করতে হবে?
+The existing backend and data format are retained. Configure **one** backend or **both**:
 
-Render Blueprint-এর জন্য নিচের **৪টি Environment Variable** দিতে হবে:
-
-| Variable | কী দিতে হবে |
-|---|---|
-| `VAULT_SETUP_KEY` | আলাদা, একবারের Setup Key (কমপক্ষে ৩২ অক্ষর) |
-| `GITHUB_TOKEN` | GitHub Fine-grained Personal Access Token (PAT) |
-| `GITHUB_OWNER` | GitHub username অথবা organization name |
-| `GITHUB_REPO` | Vault data রাখার private repository name |
-
-বাকি সবকিছু `render.yaml`-এ আগেই সেট করা আছে। `SECRET_KEY` Render নিজে generate করবে; `APP_PASSWORD`, Google credentials, database URL বা Redis প্রয়োজন নেই। `VAULT_SETUP_KEY`-এর জন্য আলাদা random value তৈরি করে Render Environment-এ রাখবে। Generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
-
-Deploy শেষ হলে প্রথমবারের **Create your private workspace** Wizard-এ `VAULT_SETUP_KEY` দিয়ে ownership প্রমাণ করবে, তারপর কমপক্ষে ১৬ অক্ষরের Workspace Password তৈরি করবে। ওয়েবসাইট কখনো GitHub PAT চাইবে না; `GITHUB_TOKEN` কেবল Render server-side ব্যবহার করবে। Password-এর plaintext কোথাও রাখা হয় না; salted PBKDF2-SHA256 verifier তোমার private GitHub data repository-তে `.personal-vault-web/auth.json` ফাইলে থাকবে।
-
-এই একবারের Setup Key verification জরুরি: প্রথমবারের password setup যদি সবার জন্য খোলা থাকত, তাহলে URL আগে পাওয়া যে কেউ নিজের password বসিয়ে তোমাকে Vault থেকে Lock Out করতে পারত। তাই আলাদা একটি দীর্ঘ random secret দিয়ে প্রথম setup অনুমোদিত হবে। Setup শেষ হওয়ার পর Render Environment থেকে `VAULT_SETUP_KEY` মুছে দেবে; এরপর Workspace Password দিয়েই login হবে।
-
-**অর্থাৎ: Deploy → ৩টি GitHub value + ১টি random Setup Key → Deploy → Website-এ Setup Key দিয়ে ১৬+ character password তৈরি → Setup Key মুছে ব্যবহার শুরু।**
-
----
-
-## What changed in 2.4.1
-
-- Rebuilt Saved Messages as a full-screen, dark-blue, mobile-first chat interface matching the approved mockup: category tabs, search, blue message bubbles, composer, emoji picker and bottom Text Size / Theme / Settings controls.
-- Chat is now the landing screen after login; Dashboard, Library, Trash and Settings remain available from the navigation drawer.
-- Removed successful-save toasts and secondary explanatory copy; error feedback remains visible.
-- Improved chat scroll handling after sends/searches, keyboard shortcuts, mobile safe areas and independent chat text scaling.
-- Added a working Links category and corrected the API's `only_deleted` filter.
-- Media and Files tabs are shown but disabled because the current Vault storage format stores text notes and links only; no fake attachment controls are exposed.
-- First-run setup continues to use the server-side `VAULT_SETUP_KEY`; the browser never receives the GitHub PAT.
-
-## Build fix in 2.2.1
-
-The frontend build fixes the two TypeScript errors reported by the previous Render build:
-- Replaced the removed `Github` brand export from `lucide-react` with the supported `Database` icon for the GitHub storage provider.
-- Added `frontend/src/vite-env.d.ts` with the Vite client reference and an explicit `*.css` module declaration so TypeScript 7 accepts the stylesheet side-effect import.
-
-## 1. আগে GitHub প্রস্তুত করো
-
-তোমার একটি GitHub repository দরকার যেখানে Vault-এর ডেটা রাখা হবে। দুইটি পথ আছে:
-
-- **পুরোনো Telegram Bot-এর ডেটা চালিয়ে যেতে চাইলে:** আগের Bot যে GitHub repository, branch ও `vault-data` directory ব্যবহার করত, সেই repository-ই `GITHUB_OWNER` ও `GITHUB_REPO`-তে দেবে। এতে আগের JSONL ডেটা সরাসরি পড়া যাবে।
-- **একেবারে নতুন Vault শুরু করলে:** একটি Private Repository তৈরি করো এবং `Add a README file` চালু রাখো, যাতে `main` branch তৈরি হয়।
-
-Website Source Code যে repository-তে upload করবে, সেটি এবং Vault Data Repository একইও হতে পারে, আলাদাও হতে পারে। পুরোনো Bot-এর data reuse করতে চাইলে `GITHUB_REPO`-তে পুরোনো Bot-এর data repository দেবে।
-
-### GitHub PAT তৈরি
-
-GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token:
-
-1. Resource owner-এ সঠিক GitHub user/organization বেছে নাও।
-2. Repository access-এ শুধু Vault Data Repository নির্বাচন করো।
-3. Repository permissions-এ **Contents: Read and write** দাও।
-4. Token তৈরি করে কপি করো। এটি `GITHUB_TOKEN`-এ দেবে।
-
-এই permission দরকার, কারণ অ্যাপকে আগের JSONL পড়তে এবং নতুন/পরিবর্তিত JSONL ও password verifier লিখতে হয়। GitHub Contents API-তে read-এর জন্য Contents read এবং file create/update-এর জন্য Contents write লাগে।
-
-**গুরুত্বপূর্ণ:** PAT কখনো Source Code, README, `.env` বা ZIP-এ লিখবে না। শুধু Render-এর secret field-এ দেবে। PAT-টি কেবল নির্দিষ্ট Private Repository-তে সীমাবদ্ধ রাখবে।
-
----
-
-## 2. Source Repository-তে Upload
-
-1. ZIP Extract করো।
-2. ভেতরের সব ফাইল ও ফোল্ডার একটি GitHub repository-এর root-এ upload করো।
-3. নিশ্চিত করো default branch `main` এবং root-এ `render.yaml` ও `Dockerfile` আছে।
-4. Source Repository private হলে Render-এর GitHub App-কে এই repository access দাও। Public repository হলে অতিরিক্ত source access approval লাগবে না।
-
-## 3. One-click Render Deployment
-
-1. Source Repository-এর README থেকে **Deploy to Render** বাটনে চাপ দাও; অথবা Render Dashboard-এ **New → Blueprint** নির্বাচন করে Source Repository connect করো।
-2. Render `render.yaml` detect করে `personal-vault-web` Web Service তৈরি করবে।
-3. Environment Variable prompt-এ এই চারটি value বসাও:
-   - `VAULT_SETUP_KEY` → random setup secret (কমপক্ষে ৩২ অক্ষর)
-   - `GITHUB_TOKEN` → তোমার Fine-grained PAT
-   - `GITHUB_OWNER` → GitHub username বা organization
-   - `GITHUB_REPO` → Vault Data Repository-এর নাম (`.git` ছাড়া)
-4. Blueprint review করে Apply/Deploy করো।
-5. Deploy সম্পন্ন হলে Render-এর দেওয়া HTTPS URL খুলে `VAULT_SETUP_KEY` দিয়ে প্রথমবারের ownership verification করো, তারপর Workspace Password তৈরি করো। সফল হলে Render Environment থেকে `VAULT_SETUP_KEY` মুছে দাও।
-
-Render Blueprint-এ আগে থেকেই configured:
-
-- Docker runtime এবং Free Web Service plan
-- `APP_ENV=production`, `COOKIE_SECURE=true`
-- Session lifetime: ২৪ ঘণ্টা
-- Stable `SECRET_KEY` automatic generation
-- `GITHUB_BRANCH=main`, `VAULT_DATA_DIR=vault-data`
-- Health check: `/health`
-- Upload limit: ২৫ MB
-- Render auto-deploy disabled; নতুন deployment Render Dashboard থেকে হাতে trigger করা যাবে
-
-### Render source access বনাম data access
-
-Render-এর GitHub App Source Repository clone/build করার জন্য ব্যবহৃত হয়। `GITHUB_TOKEN` Website-কে Vault Data Repository পড়তে/লিখতে দেয়। Source Repository ও Data Repository আলাদা হলে দুইটির access আলাদা করে অনুমোদন করতে হবে।
-
-### Browser phishing / unsafe-site warning
-
-এই Source Code-এ GitHub PAT browser-এ চাওয়া হয় না, third-party font/CDN/analytics নেই, এবং CSP, HTTPS-only secure cookies ও security headers ব্যবহার করা হয়। তবে Chrome Safe Browsing বা Microsoft SmartScreen-এর URL reputation তালিকা hosting provider-এর বাইরে নিয়ন্ত্রিত; নতুন/কম-পরিচিত domain বা আগের false-positive classification থাকলে code deploy করলেই warning সঙ্গে সঙ্গে সরে যায় না।
-
-- Chrome/Google warning হলে Search Console-এর Security Issues report পরীক্ষা করো; কোনো deceptive content শনাক্ত হলে ঠিক করে review request করো। ভুল classification হলে [Google Safe Browsing false-positive report](https://www.google.com/safebrowsing/report_error/) জমা দাও।
-- Edge/SmartScreen warning হলে warning page-এর **More information → Report that this site doesn't contain threats** ব্যবহার করে site owner হিসেবে report করো।
-
-Warning বন্ধ হয়েছে কি না যাচাই না করা পর্যন্ত browser-এর safety protection বন্ধ করে site-এ প্রবেশ করার পরামর্শ দেওয়া হচ্ছে না।
-
----
-
-## 4. Website-এ কী কী করা যাবে?
-
-কোনো Telegram-style manual command বা slash command নেই। সব কাজ modern UI controls, search, menu, dialog ও Settings থেকে হবে।
-
-- **Dashboard:** মোট saved item, active note, Trash, recent activity ও popular hashtags।
-- **Modern Search:** Keyword, exact phrase, hashtag, URL/domain এবং date/date range filter। `/` অথবা `Ctrl/Cmd + K` দিয়ে দ্রুত search-এ focus করা যায়।
-- **Saved Messages:** Telegram Saved Messages-এর মতো chat view; message bubble, search, quick save composer, edit/delete এবং older-message loading।
-- **Library:** সব note/message browse, filter, sort, preview ও edit।
-- **Create / Edit:** নতুন note তৈরি এবং পুরোনো message edit।
-- **Trash:** Soft-delete, restore এবং trashed item আলাদা করে দেখা।
-- **Telegram Import:** Telegram Desktop-এর Saved Messages → Export Chat History → Machine-readable JSON।
-- **Vault Import:** পূর্বে Export করা Vault JSON অথবা JSONL Import।
-- **Export:** সম্পূর্ণ Vault JSON, JSONL অথবা CSV হিসেবে download। Trash-এর item-ও পূর্ণ backup-এ অন্তর্ভুক্ত।
-- **Merge logic:** নতুন record যোগ; একই ID-এর newer `edited_at` থাকলে সংশ্লিষ্ট record update; Duplicate বা পুরোনো export skip; অন্য record অক্ষত।
-- **Settings:** Storage Status, Import, Export, Backup, Workspace Password/Security, Appearance, density এবং আলাদা Dashboard/Chat size controls।
-- **Google Drive:** Render-এর quick-deploy flow-এ ডিফল্টভাবে প্রয়োজন নেই। পরে advanced configuration হিসেবে Drive OAuth যোগ করে GitHub primary + Drive mirror করা যাবে।
-
-এই সংস্করণের data format আগের Telegram Personal Vault Bot-এর JSONL shard format-এর সঙ্গে compatible। একই Vault-এ Bot এবং Website একসঙ্গে চালাবে না; concurrent write conflict এড়াতে Website চালুর আগে Bot service বন্ধ করবে।
-
-**বর্তমান data scope:** text message ও note। ছবি, ভিডিও, document এবং voice file এখনো storage/import scope-এর বাইরে। Telegram Desktop export-এর original timestamp, edited timestamp, hashtag, link এবং text data সংরক্ষিত হয়।
-
----
-
-
-## 4.1 Security model (important)
-
-- **Server-side authentication:** every private page and every private API endpoint checks authentication on the server. Hiding React screens is not treated as security.
-- **First-run ownership proof:** before anyone can claim the first password, the setup endpoint requires the separate `VAULT_SETUP_KEY` configured in the host environment. The key is compared server-side, is never stored with the password verifier, and should be removed from the host after the first setup.
-- **GitHub credential isolation:** `GITHUB_TOKEN` is only used by the backend for repository storage. The React page never asks for it or receives it.
-- **Password protection:** minimum 16 characters (maximum 1,024); salted PBKDF2-HMAC-SHA256 with 600,000 iterations; only the verifier is stored in the private data repository. Use a unique passphrase that you do not reuse elsewhere.
-- **Server-side session allowlist:** after login the server creates a random session ID and records its expiry in server memory. A signed, HttpOnly, Secure-in-production, SameSite=Lax cookie is not sufficient by itself; every private request also checks the server-side active-session registry.
-- **Session lifetime:** 24 hours by default. Server restarts invalidate active sessions, so sign in again after a restart. Run one application instance; multi-replica deployments need a shared session backend and are not enabled by this lightweight free-hosting build.
-- **CSRF and browser protections:** session-bound CSRF token on state-changing actions; Content Security Policy, frame denial, MIME sniffing protection, referrer policy, no-store for private responses and HTTPS Secure cookies in production.
-- **Login/setup throttling:** five failed attempts per IP in a 15-minute window. The limiter is in-memory and resets on process restart; use the hosting provider's edge protection for stronger distributed throttling.
-- **Secret handling:** GitHub PAT is only used server-side for GitHub storage. `VAULT_SETUP_KEY` is a separate one-time setup secret; remove it from the hosting environment after first-run setup. Neither secret is returned by the API or written to logs. Never paste them into chat or source code.
-
-## 5. Render ছাড়াও অন্যান্য hosting
-
-প্রজেক্টটি একই multi-stage Dockerfile ব্যবহার করে। Render, Railway, Koyeb অথবা Dockerfile সমর্থিত অন্য provider-এ Website চালানো যায়। অন্য provider-এ একই তিনটি GitHub environment variable দিতে হবে এবং session স্থায়ী রাখতে একটি স্থায়ী `SECRET_KEY` configure করতে হবে। সেখানে `SECRET_KEY` auto-generated না হলে নিজের random value দিতে হবে।
-
-| Hosting | Deployment | Free-tier সম্পর্কে |
+| Mode | GitHub variables | Google Drive variables |
 |---|---|---|
-| Render | Blueprint / Dockerfile | Blueprint-এ Free plan নির্বাচন করা আছে; inactivity-তে sleep হতে পারে |
-| Railway | Dockerfile | Free allowance/credit ও usage limits প্রযোজ্য |
-| Koyeb | Dockerfile | Free instance-এর resource ও scale-to-zero সীমাবদ্ধতা প্রযোজ্য |
-| Other Docker hosts | Dockerfile / Compose | Provider-এর নিজস্ব pricing ও limits প্রযোজ্য |
+| GitHub only | `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO` | Leave both blank |
+| Google Drive only | Leave all three blank | `GOOGLE_OAUTH_CLIENT_B64`, `GOOGLE_OAUTH_TOKEN_B64` |
+| Both | Configure all three | Configure both |
 
-Docker-compatible মানেই ২৪/৭ Free Hosting নিশ্চিত নয়। Free plan-এর quota, sleep, cold start ও availability provider যেকোনো সময় পরিবর্তন করতে পারে। App-এর persistent data GitHub-এ থাকে; Render-এর local disk-এ নির্ভর করে না।
+`GITHUB_BRANCH` defaults to `main`; `VAULT_DATA_DIR` defaults to `vault-data`. Keep the same branch and data directory as the Telegram bot to reuse the same vault. The Drive adapter uses the existing `Telegram Personal Vault` folder and the same `vaultPath` JSONL objects as the bot.
 
----
+**Dual mode behavior:** GitHub is the primary store and Google Drive is its mirror. New writes are committed to GitHub first; Drive mirror failures are tracked and retried by the existing storage layer. In Drive-only mode, Drive is the primary store. The app refuses to start with no valid backend or a partial set of credentials.
 
-## 6. Advanced / local configuration
+### Google Drive OAuth setup
 
-Render-এর one-click GitHub-only mode-এ উপরের ৩টি input ছাড়া আর কিছু লাগে না। Google Drive বা local development-এর জন্য advanced environment variables প্রয়োজন হতে পারে। `.env.example`-এ তাদের তালিকা আছে।
+Use the provided helper on your local computer after downloading a Desktop OAuth client JSON from Google Cloud:
 
-### Local run
+```bash
+python -m pip install -r requirements.txt
+python scripts/google_auth.py --credentials credentials.json
+```
 
-প্রথমে আধুনিক React UI build করো; এরপর FastAPI চালালে browser-এ একই first-run password setup wizard পাওয়া যাবে।
+Complete Google's consent screen. The script prints `GOOGLE_OAUTH_CLIENT_B64` and `GOOGLE_OAUTH_TOKEN_B64`. Add both values as private environment variables in the hosting dashboard. Never put them in source code or share them in chat. You can optionally set `GOOGLE_DRIVE_FOLDER_ID` to use an existing folder; otherwise the app finds or creates `Telegram Personal Vault`.
+
+For a **Drive-only** installation, also set `APP_PASSWORD` to a strong password of at least 16 characters. Because no GitHub repository is available to store the website password verifier, this password is read from the hosting environment. For GitHub or dual mode, leave `APP_PASSWORD` blank and complete the one-time setup using `VAULT_SETUP_KEY`; the salted password verifier is stored in the private GitHub data repository.
+
+### GitHub setup
+
+Create a private data repository and a fine-grained GitHub token limited to that repository, with **Contents: Read and write** permission. Set all three GitHub variables. The website only uses the token server-side.
+
+Do not point the website at a different `VAULT_DATA_DIR` if you want to reuse the Telegram bot's existing records. The default is `vault-data` in both projects.
+
+## Render deployment
+
+The included `render.yaml` is the simple GitHub-first Blueprint. It asks for the GitHub token, owner, repository, and one-time setup key; Render generates `SECRET_KEY`.
+
+1. Upload this project to a GitHub repository.
+2. In Render, create a Blueprint from that source repository.
+3. Supply the GitHub data-repository values and a random `VAULT_SETUP_KEY` of at least 32 characters.
+4. Deploy, open the generated site, enter the setup key, and create a password of at least 16 characters.
+5. After setup succeeds, remove `VAULT_SETUP_KEY` from Render's environment and redeploy.
+
+To use **both** stores on Render, add `GOOGLE_OAUTH_CLIENT_B64` and `GOOGLE_OAUTH_TOKEN_B64` in the service Environment settings. GitHub remains primary and Drive becomes the mirror.
+
+To use **Drive only** on Render, set the two Google OAuth variables and `APP_PASSWORD` (at least 16 characters), then remove/clear `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` together. Do not leave only part of the GitHub group configured. The service must have a complete valid storage group before it can start.
+
+The local filesystem is not used for persistent vault records. Render Free services may sleep when idle and the next request may have a cold start; instant always-on hosting is not guaranteed.
+
+## Local development
+
+Copy `.env.example` to `.env`, configure one storage mode, then run:
 
 ```bash
 cd frontend
@@ -177,46 +69,35 @@ npm install
 npm run build
 cd ..
 python -m pip install -r requirements.txt
-python scripts/generate_secret.py
 python -m app.main
 ```
 
-Local `.env`-এ অন্তত GitHub-এর তিনটি variable এবং একটি stable `SECRET_KEY` বসাও। Drive-only local configuration ব্যবহার করলে `APP_PASSWORD` environment variable প্রয়োজন, কারণ first-run password verifier-এর persistent store হিসেবে GitHub নেই।
+Open `http://localhost:8000`. For local HTTP, set `COOKIE_SECURE=false`. Set a stable `SECRET_KEY` of at least 32 characters. GitHub/dual mode can use the one-time setup flow with `VAULT_SETUP_KEY`. Drive-only mode should use `APP_PASSWORD`.
 
-### Optional Google Drive mirror
+## Existing data and compatibility
 
-Advanced deployment-এ Google Drive যুক্ত করতে `GOOGLE_OAUTH_CLIENT_B64` ও `GOOGLE_OAUTH_TOKEN_B64` configure করতে হবে। GitHub + Drive হলে GitHub primary এবং Drive mirror; GitHub-only হলে ডেটা শুধু GitHub-এ; Drive-only advanced mode-ও supported, তবে Render one-click Blueprint ইচ্ছাকৃতভাবে GitHub-only রাখা হয়েছে যেন first-time setup মাত্র তিনটি input-এ শেষ হয়।
+- The vault remains newline-delimited JSON (JSONL), partitioned by UTC date under `vault-data/YYYY/MM/DD/part-XXXX.jsonl`.
+- Existing Telegram bot records are read without conversion when branch, repository, and data directory match.
+- Import uses record IDs to merge rather than blindly replacing the complete vault. Existing records not present in an import are retained.
+- Export is JSONL, which is the compact, lossless format used by both app storage adapters. Telegram Desktop JSON remains an accepted import format.
+- The schema is text-only: message text, IDs, dates, edit/deletion metadata, hashtags, and links. The web UI does not claim to upload images, videos, documents, or voice messages.
 
----
+**Concurrent writers:** the Telegram bot and website share the same shard files. Avoid sending or editing from both services at the exact same time; simultaneous commits to one GitHub shard may conflict. For a safe migration, stop the bot while testing website writes, then restart only after the test is complete.
 
-## 7. Security & reliability
+## Security and limitations
 
-- GitHub token server-side; frontend-এ পাঠানো হয় না।
-- Workspace password plaintext নয়; salted PBKDF2-SHA256 verifier private data repo-তে রাখা হয়।
-- Signed session cookie, CSRF validation, login rate limit এবং security headers ব্যবহৃত হয়।
-- Message content application log-এ লেখা হয় না।
-- App local filesystem-এ Vault data রাখে না; GitHub হলো persistent store।
-- অন্তত একটি persistent storage backend required; invalid/partial GitHub config হলে startup fail হবে।
-- Workspace password Settings → Security থেকে পরিবর্তন করা যায়।
-- GitHub repository ও PAT private এবং least-privilege রাখো; PAT revoke করলে নতুন credential দিয়ে redeploy করতে হবে।
+- GitHub and Google OAuth secrets remain server-side and are never returned to the browser.
+- State-changing requests use the existing session CSRF token.
+- The website uses the existing password/session middleware and security headers.
+- A deployment restart invalidates in-memory active sessions; users may need to sign in again.
+- Google Drive API availability, OAuth consent, provider quotas, and hosting cold starts are external dependencies.
+- The send bubble appears immediately, but final persistence still depends on the selected storage provider responding.
 
-### গুরুত্বপূর্ণ Render Free সীমাবদ্ধতা
+## Project layout
 
-Render Free Web Service ১৫ মিনিট incoming traffic না পেলে spin down করতে পারে; পরের request-এ cold start হতে পারে। Free service-এর local filesystem ephemeral, তাই website-এর durable data GitHub repository-তে থাকে। এটি personal vault-এর জন্য উপযোগী, তবে instant always-on response-এর নিশ্চয়তা নয়।
-
----
-
-## Project files
-
-- `app/` — FastAPI API, authentication, GitHub/Drive storage এবং import/export logic
-- `frontend/` — React + TypeScript + Vite + Tailwind UI
-- `render.yaml` — one-click Render Blueprint; prompts for one-time setup key and three GitHub values
-- `Dockerfile` — frontend build + Python runtime in one image
-- `railway.json` — Railway Docker deployment configuration
-- `docker-compose.yml` — local/container deployment
-- `.env.example` — optional advanced/local configuration reference
-- `tests/` — backend, API, import, merge and storage tests
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md).
+- `app/` — FastAPI authentication, JSONL storage adapters, APIs, and import/export.
+- `frontend/` — small React + TypeScript + Vite chat interface.
+- `scripts/google_auth.py` — local Google Drive OAuth token helper.
+- `render.yaml` — GitHub-first Render Blueprint.
+- `Dockerfile` — frontend build and Python runtime.
+- `tests/` — backend storage, configuration, import, API, and deployment tests.
